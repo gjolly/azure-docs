@@ -190,31 +190,25 @@ To install NVIDIA GRID drivers on NV or NVv3-series VMs, make an SSH connection 
 
 ### Ubuntu
 
+> [!WARNING]
+> Because the GRID drivers cannot be signed by Canonical installing them on a system with secure boot enabled would prevent the system from booting.
+> To check if secure boot is enabled on your VM, run the following command: `sudo mokutil --sb-state`.
+
+#### Driver Installation
+
+This guide assumes that you are using the official Ubuntu images provided by Canonical on Azure.
+
 1. Run the `lspci` command. Verify that the NVIDIA M60 card or cards are visible as PCI devices.
 
 2. Install updates.
 
    ```bash
-   sudo apt-get update
-   sudo apt-get upgrade -y
-   sudo apt-get dist-upgrade -y
-   sudo apt-get install build-essential ubuntu-desktop -y
-   sudo apt-get install linux-azure -y
-   ```
-3. Disable the Nouveau kernel driver, which is incompatible with the NVIDIA driver. (Only use the NVIDIA driver on NV or NVv2 VMs.) To disable the driver, create a file in `/etc/modprobe.d` named `nouveau.conf` with the following contents:
-
-   ```
-   blacklist nouveau
-   blacklist lbm-nouveau
+   sudo apt update
+   sudo apt -y full-upgrade
+   sudo apt install -y build-essential
    ```
 
-4. Reboot the VM and reconnect. Exit X server:
-
-   ```bash
-   sudo systemctl stop lightdm.service
-   ```
-
-5. Download and install the GRID driver:
+3. Download and install the GRID driver:
 
    ```bash
    wget -O NVIDIA-Linux-x86_64-grid.run https://go.microsoft.com/fwlink/?linkid=874272
@@ -222,28 +216,27 @@ To install NVIDIA GRID drivers on NV or NVv3-series VMs, make an SSH connection 
    sudo ./NVIDIA-Linux-x86_64-grid.run
    ```
 
-6. When you're asked whether you want to run the nvidia-xconfig utility to update your X configuration file, select **Yes**.
+#### Driver Configuration
 
-7. After installation completes, copy /etc/nvidia/gridd.conf.template to a new file gridd.conf at location /etc/nvidia/
+1. After installation completes, copy /etc/nvidia/gridd.conf.template to a new file named gridd.conf at location /etc/nvidia/
 
    ```bash
    sudo cp /etc/nvidia/gridd.conf.template /etc/nvidia/gridd.conf
    ```
 
-8. Add the following to `/etc/nvidia/gridd.conf`:
+2. Add the following to `/etc/nvidia/gridd.conf`:
 
    ```
    IgnoreSP=FALSE
    EnableUI=FALSE
    ```
 
-9. Remove the following from `/etc/nvidia/gridd.conf` if it is present:
+3. Remove the following from `/etc/nvidia/gridd.conf` if it is present:
 
    ```
    FeatureType=0
    ```
 
-10. Reboot the VM and proceed to verify the installation.
 
 #### Install GRID driver on Ubuntu with Secure Boot enabled
 
